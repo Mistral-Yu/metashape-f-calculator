@@ -307,8 +307,8 @@
       </div>
       <div class="formula-strip" aria-label="Formula">
         <span class="formula-label">Formula</span>
-        <code>pixel_size = sensor_width / image_width</code>
-        <code>f_px = focal_length / pixel_size</code>
+        <code>pixel_size_diag = sensor_diag / image_diag</code>
+        <code>f = focal_length / pixel_size_diag</code>
       </div>
     </section>
 
@@ -362,7 +362,8 @@
           <p class="panel-title">Output</p>
           <div class="copy-actions">
             <button type="button" data-copy="f">Copy f</button>
-            <button type="button" data-copy="pixel">Copy pixel</button>
+            <button type="button" data-copy="pixelX">Copy px X</button>
+            <button type="button" data-copy="pixelY">Copy px Y</button>
           </div>
         </div>
         <div class="hero-result">
@@ -371,19 +372,20 @@
             <strong id="metashapeF">3727.05882</strong>
           </div>
           <div class="pixel-value">
-            <span>Pixel size</span>
+            <span>Diagonal pixel size</span>
             <strong id="pixelSize">0.003756 mm</strong>
             <small id="pixelSizeUm">3.7563 micrometer / px</small>
           </div>
           <div class="detail-grid">
             <div class="detail">
-              <span>f_x / f_y</span>
-              <strong id="fxfy">3727.05882 / 3727.05882</strong>
+              <span>Pixel X / Y</span>
+              <strong id="pixelWHOut">0.003756 / 0.003756</strong>
+              <small>mm per pixel</small>
             </div>
             <div class="detail">
-              <span>Copy values</span>
-              <strong id="copyPreview">f 3727.05882</strong>
-              <small id="copyPreviewPixel">pixel 0.003756 mm</small>
+              <span>Focal length</span>
+              <strong id="focalOut">14.00 mm</strong>
+              <small>enter with pixel size, or copy f only</small>
             </div>
           </div>
         </div>
@@ -405,9 +407,9 @@
             <small>horizontal / vertical</small>
           </div>
           <div class="diag">
-            <span>Pixel W / H</span>
-            <strong id="pixelWH">0.003756 / 0.003756</strong>
-            <small>millimeters per pixel</small>
+            <span>f_x / f_y</span>
+            <strong id="fxfy">3727.05882 / 3727.05882</strong>
+            <small>diagnostic only</small>
           </div>
           <div class="diag">
             <span>Status</span>
@@ -441,11 +443,10 @@
       fxfy: document.getElementById('fxfy'),
       fov: document.getElementById('fov'),
       aspectRatio: document.getElementById('aspectRatio'),
-      pixelWH: document.getElementById('pixelWH'),
+      pixelWHOut: document.getElementById('pixelWHOut'),
+      focalOut: document.getElementById('focalOut'),
       aspectStatus: document.getElementById('aspectStatus'),
-      error: document.getElementById('aspectError'),
-      copyPreview: document.getElementById('copyPreview'),
-      copyPreviewPixel: document.getElementById('copyPreviewPixel')
+      error: document.getElementById('aspectError')
     };
 
     const presets = {
@@ -454,7 +455,7 @@
       a6400: { focal: 16, sensorW: 23.5, sensorH: 15.6, imageW: 6000, imageH: 4000 }
     };
 
-    let latest = { f: '', pixel: '' };
+    let latest = { f: '', pixelX: '', pixelY: '' };
 
     function numberValue(input) {
       const value = Number(input.value);
@@ -479,12 +480,11 @@
     }
 
     function showInvalid() {
-      ['metashapeF', 'pixelSize', 'fxfy', 'fov', 'aspectRatio', 'pixelWH', 'aspectStatus', 'copyPreview'].forEach(key => { output[key].textContent = 'Invalid'; });
+      ['metashapeF', 'pixelSize', 'fxfy', 'fov', 'aspectRatio', 'pixelWHOut', 'focalOut', 'aspectStatus'].forEach(key => { output[key].textContent = 'Invalid'; });
       output.pixelSizeUm.textContent = 'Enter positive numeric values.';
-      output.copyPreviewPixel.textContent = '';
       output.error.textContent = '';
       output.error.classList.remove('visible');
-      latest = { f: '', pixel: '' };
+      latest = { f: '', pixelX: '', pixelY: '' };
     }
 
     function calculate() {
@@ -498,6 +498,10 @@
 
       const pixelSizeW = sensorW / imageW;
       const pixelSizeH = sensorH / imageH;
+      const sensorDiag = Math.hypot(sensorW, sensorH);
+      const imageDiag = Math.hypot(imageW, imageH);
+      const pixelSizeDiag = sensorDiag / imageDiag;
+      const fMetashape = focal / pixelSizeDiag;
       const fX = focal / pixelSizeW;
       const fY = focal / pixelSizeH;
       const hfov = 2 * Math.atan(sensorW / (2 * focal)) * 180 / Math.PI;
@@ -508,16 +512,15 @@
       const imageIsSquare = Math.abs(aspectImage - 1) < 0.001;
       const sensorIsSquare = Math.abs(aspectSensor - 1) < 0.001;
 
-      latest = { f: raw(fX, 5), pixel: raw(pixelSizeW, 6) };
-      output.metashapeF.textContent = fmt(fX, 5);
-      output.pixelSize.textContent = `${fmt(pixelSizeW, 6)} mm`;
-      output.pixelSizeUm.textContent = `${fmt(pixelSizeW * 1000, 4)} micrometer / px`;
+      latest = { f: raw(fMetashape, 5), pixelX: raw(pixelSizeW, 6), pixelY: raw(pixelSizeH, 6) };
+      output.metashapeF.textContent = fmt(fMetashape, 5);
+      output.pixelSize.textContent = `${fmt(pixelSizeDiag, 6)} mm`;
+      output.pixelSizeUm.textContent = `${fmt(pixelSizeDiag * 1000, 4)} micrometer / px diagonal`;
       output.fxfy.textContent = `${fmt(fX, 5)} / ${fmt(fY, 5)}`;
       output.fov.textContent = `${fmt(hfov, 2)} / ${fmt(vfov, 2)} deg`;
       output.aspectRatio.textContent = `${aspectSensor.toFixed(4)} / ${aspectImage.toFixed(4)}`;
-      output.pixelWH.textContent = `${raw(pixelSizeW, 6)} / ${raw(pixelSizeH, 6)}`;
-      output.copyPreview.textContent = `f ${latest.f}`;
-      output.copyPreviewPixel.textContent = `pixel ${latest.pixel} mm`;
+      output.pixelWHOut.textContent = `${raw(pixelSizeW, 6)} / ${raw(pixelSizeH, 6)}`;
+      output.focalOut.textContent = `${fmt(focal, 2)} mm`;
 
       if (aspectDiff > 0.01) {
         const squareNote = imageIsSquare !== sensorIsSquare ? ' Square mismatch.' : '';
@@ -557,7 +560,11 @@
       button.addEventListener('click', () => setPreset(presets[button.dataset.preset], button));
     });
     document.querySelectorAll('[data-copy]').forEach(button => {
-      button.addEventListener('click', () => copyText(button.dataset.copy === 'f' ? latest.f : latest.pixel, button));
+      button.addEventListener('click', () => {
+        const key = button.dataset.copy;
+        const value = key === 'f' ? latest.f : key === 'pixelX' ? latest.pixelX : latest.pixelY;
+        copyText(value, button);
+      });
     });
     calculate();
   </script>
