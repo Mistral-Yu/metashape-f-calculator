@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ja">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -14,9 +14,12 @@
       --line: #ded9cd;
       --accent: #2f6f62;
       --accent-ink: #f8fffc;
-      --warn-bg: #fff6db;
-      --warn-line: #e5c75f;
-      --warn-ink: #6e5400;
+      --error-bg: #fff1e8;
+      --error-line: #d18763;
+      --error-ink: #733817;
+      --ok-bg: #edf8f3;
+      --ok-line: #9cc6b8;
+      --ok-ink: #22584c;
       --shadow: 0 22px 60px rgba(43, 39, 31, 0.10);
       --mono: "SFMono-Regular", "Roboto Mono", "JetBrains Mono", Consolas, monospace;
       --sans: "Avenir Next", "Hiragino Sans", "Yu Gothic", system-ui, -apple-system, sans-serif;
@@ -42,7 +45,7 @@
 
     .hero {
       display: grid;
-      grid-template-columns: minmax(0, 0.85fr) minmax(360px, 1.15fr);
+      grid-template-columns: minmax(0, 0.82fr) minmax(360px, 1.18fr);
       gap: 28px;
       align-items: end;
       margin-bottom: 28px;
@@ -79,13 +82,13 @@
 
     .app {
       display: grid;
-      grid-template-columns: minmax(320px, 0.85fr) minmax(0, 1.15fr);
+      grid-template-columns: minmax(320px, 0.86fr) minmax(0, 1.14fr);
       gap: 24px;
       align-items: start;
     }
 
     .panel {
-      background: rgba(255, 254, 250, 0.86);
+      background: rgba(255, 254, 250, 0.88);
       border: 1px solid rgba(222, 217, 205, 0.86);
       border-radius: 28px;
       box-shadow: var(--shadow);
@@ -95,7 +98,7 @@
 
     .panel-head {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: space-between;
       gap: 16px;
       padding: 22px 24px;
@@ -111,10 +114,11 @@
       font-weight: 700;
     }
 
-    .preset-row {
+    .preset-row, .copy-actions {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
+      justify-content: flex-end;
     }
 
     button {
@@ -132,6 +136,7 @@
     button:hover { border-color: var(--accent); }
     button:active { transform: translateY(1px) scale(0.99); }
     button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+    button.copied { background: var(--ok-bg); border-color: var(--ok-line); color: var(--ok-ink); }
 
     .fields {
       padding: 24px;
@@ -224,7 +229,7 @@
     .metric strong {
       display: block;
       font-family: var(--mono);
-      font-size: clamp(24px, 4vw, 42px);
+      font-size: clamp(23px, 3.7vw, 40px);
       line-height: 1;
       letter-spacing: -0.06em;
       font-weight: 760;
@@ -241,25 +246,6 @@
 
     .metric.main small { color: rgba(255, 254, 250, 0.7); }
 
-    .copy-line {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      gap: 10px;
-      align-items: center;
-      border-top: 1px solid var(--line);
-      padding-top: 16px;
-    }
-
-    .copy-text {
-      min-width: 0;
-      overflow: auto;
-      white-space: nowrap;
-      font-family: var(--mono);
-      font-size: 13px;
-      color: var(--muted);
-      padding-bottom: 2px;
-    }
-
     .notice {
       border: 1px solid var(--line);
       border-radius: 18px;
@@ -270,14 +256,15 @@
       background: rgba(255, 255, 255, 0.42);
     }
 
-    .notice.warn {
+    .notice.error {
       display: none;
-      border-color: var(--warn-line);
-      background: var(--warn-bg);
-      color: var(--warn-ink);
+      border-color: var(--error-line);
+      background: var(--error-bg);
+      color: var(--error-ink);
+      font-weight: 650;
     }
 
-    .notice.warn.visible { display: block; }
+    .notice.error.visible { display: block; }
 
     .source {
       margin-top: 18px;
@@ -286,16 +273,16 @@
       line-height: 1.7;
     }
 
-    @media (max-width: 860px) {
+    @media (max-width: 900px) {
       main { width: min(100% - 24px, 720px); padding-top: 28px; }
       .hero, .app, .metric-grid { grid-template-columns: 1fr; }
       .hero { align-items: start; }
+      .preset-row, .copy-actions { justify-content: flex-start; }
     }
 
     @media (max-width: 560px) {
       .two { grid-template-columns: 1fr; }
-      .panel-head { align-items: flex-start; flex-direction: column; }
-      .copy-line { grid-template-columns: 1fr; }
+      .panel-head { flex-direction: column; }
     }
   </style>
 </head>
@@ -304,12 +291,12 @@
     <section class="hero" aria-labelledby="title">
       <div>
         <h1 id="title">Metashape f Calculator</h1>
-        <p class="lead">焦点距離、センサーサイズ、画像サイズから、Metashape の Precalibrated f に入れるピクセル単位の値と pixel size を計算します。</p>
+        <p class="lead">Convert focal length, sensor size, and image dimensions into Metashape's pixel-unit focal length and pixel size values.</p>
       </div>
       <div class="formula">
-        元式は <span class="tag">360Cam-PGM-3DGS-Tools</span> の <span class="tag">gs360_360PerspCut.py</span> と同じ考え方です。<br>
-        <code>pixel_size = sensor_width_mm / image_width_px</code><br>
-        <code>metashape_f = focal_length_mm / pixel_size</code>
+        Metashape calibration uses focal length in pixels. When your focal length is in millimeters:<br>
+        <code>pixel_size_mm = sensor_width_mm / image_width_px</code><br>
+        <code>metashape_f_px = focal_length_mm / pixel_size_mm</code>
       </div>
     </section>
 
@@ -318,15 +305,16 @@
         <div class="panel-head">
           <p class="panel-title">Input</p>
           <div class="preset-row">
-            <button type="button" class="primary" id="presetA7R5">14mm / a7R V</button>
-            <button type="button" id="resetDefault">標準値</button>
+            <button type="button" class="primary" data-preset="a7r5">a7R V 14mm</button>
+            <button type="button" data-preset="fullframe1600">Full frame 14mm 1600</button>
+            <button type="button" data-preset="a6400">a6400 16mm</button>
           </div>
         </div>
 
         <div class="fields">
           <div class="field-group">
             <div class="group-label">Lens</div>
-            <label>焦点距離 mm
+            <label>Focal length mm
               <input id="focal" type="number" inputmode="decimal" min="0.0001" step="0.01" value="14">
             </label>
           </div>
@@ -334,10 +322,10 @@
           <div class="field-group">
             <div class="group-label">Sensor mm</div>
             <div class="two">
-              <label>センサー幅
+              <label>Sensor width
                 <input id="sensorW" type="number" inputmode="decimal" min="0.0001" step="0.01" value="35.7">
               </label>
-              <label>センサー高
+              <label>Sensor height
                 <input id="sensorH" type="number" inputmode="decimal" min="0.0001" step="0.01" value="23.8">
               </label>
             </div>
@@ -346,10 +334,10 @@
           <div class="field-group">
             <div class="group-label">Image px</div>
             <div class="two">
-              <label>画像幅
+              <label>Image width
                 <input id="imageW" type="number" inputmode="numeric" min="1" step="1" value="9504">
               </label>
-              <label>画像高
+              <label>Image height
                 <input id="imageH" type="number" inputmode="numeric" min="1" step="1" value="6336">
               </label>
             </div>
@@ -360,20 +348,23 @@
       <section class="panel" aria-live="polite">
         <div class="panel-head">
           <p class="panel-title">Output</p>
-          <button type="button" id="copyResult">結果をコピー</button>
+          <div class="copy-actions">
+            <button type="button" data-copy="f">Copy f</button>
+            <button type="button" data-copy="pixel">Copy pixel size</button>
+          </div>
         </div>
 
         <div class="results">
           <div class="metric-grid">
             <div class="metric main">
-              <span>Metashape Precalibrated f</span>
+              <span>Metashape f</span>
               <strong id="metashapeF">3727.05882</strong>
-              <small>Metashape の f 欄へ入れるピクセル単位の焦点距離。</small>
+              <small>Pixel-unit focal length for Metashape's precalibrated f field.</small>
             </div>
             <div class="metric">
-              <span>pixel size</span>
+              <span>Pixel size</span>
               <strong id="pixelSize">0.003756 mm</strong>
-              <small id="pixelSizeUm">3.7563 micrometer</small>
+              <small id="pixelSizeUm">3.7563 micrometer / px</small>
             </div>
           </div>
 
@@ -381,27 +372,35 @@
             <div class="metric">
               <span>f_x / f_y</span>
               <strong id="fxfy">3727.05882 / 3727.05882</strong>
-              <small>通常は f_x と f_y が一致する設定が扱いやすい。</small>
+              <small>Uses width and height pixel size separately.</small>
             </div>
             <div class="metric">
-              <span>FOV</span>
-              <strong id="fov">103.72 / 80.73 deg</strong>
-              <small>水平 / 垂直の画角。</small>
+              <span>Aspect ratio</span>
+              <strong id="aspectRatio">1.5000 / 1.5000</strong>
+              <small>Sensor aspect / image aspect.</small>
             </div>
           </div>
 
-          <div class="notice warn" id="aspectWarn"></div>
-          <div class="notice">既存ツールの Metashape 表示は横方向の pixel size を使っています。画像とセンサーの縦横比が一致しない場合は、入力値やクロップ後の有効センサー幅を見直してください。</div>
-
-          <div class="copy-line">
-            <div class="copy-text" id="copyText"></div>
-            <button type="button" id="copyLine">この行をコピー</button>
+          <div class="metric-grid">
+            <div class="metric">
+              <span>FOV</span>
+              <strong id="fov">103.78 / 80.73 deg</strong>
+              <small>Horizontal / vertical field of view.</small>
+            </div>
+            <div class="metric">
+              <span>Copy values</span>
+              <strong id="copyPreview">f 3727.05882</strong>
+              <small id="copyPreviewPixel">pixel size 0.003756 mm</small>
+            </div>
           </div>
+
+          <div class="notice error" id="aspectError"></div>
+          <div class="notice">Calculation continues even when the aspect ratios differ. For square perspective crops from a non-square sensor, use the width-based f value if you want to match Metashape's single f field convention.</div>
         </div>
       </section>
     </section>
 
-    <p class="source">Preset: Sony a7R V still image full frame, focal length 14 mm, sensor 35.7 x 23.8 mm, image 9504 x 6336 px.</p>
+    <p class="source">Presets: Sony a7R V full resolution, rounded full-frame 36 x 24 mm square 1600 px crop, and Sony a6400 APS-C still image at 16 mm.</p>
   </main>
 
   <script>
@@ -419,14 +418,19 @@
       pixelSizeUm: document.getElementById('pixelSizeUm'),
       fxfy: document.getElementById('fxfy'),
       fov: document.getElementById('fov'),
-      warn: document.getElementById('aspectWarn'),
-      copyText: document.getElementById('copyText')
+      aspectRatio: document.getElementById('aspectRatio'),
+      error: document.getElementById('aspectError'),
+      copyPreview: document.getElementById('copyPreview'),
+      copyPreviewPixel: document.getElementById('copyPreviewPixel')
     };
 
     const presets = {
       a7r5: { focal: 14, sensorW: 35.7, sensorH: 23.8, imageW: 9504, imageH: 6336 },
-      standard: { focal: 12, sensorW: 36, sensorH: 36, imageW: 1600, imageH: 1600 }
+      fullframe1600: { focal: 14, sensorW: 36, sensorH: 24, imageW: 1600, imageH: 1600 },
+      a6400: { focal: 16, sensorW: 23.5, sensorH: 15.6, imageW: 6000, imageH: 4000 }
     };
+
+    let latest = { f: '', pixel: '' };
 
     function numberValue(input) {
       const value = Number(input.value);
@@ -441,9 +445,23 @@
       });
     }
 
+    function raw(value, digits) {
+      return Number.isFinite(value) ? value.toFixed(digits) : '';
+    }
+
     function setPreset(preset) {
       Object.entries(preset).forEach(([key, value]) => { fields[key].value = value; });
       calculate();
+    }
+
+    function showInvalid() {
+      ['metashapeF', 'pixelSize', 'fxfy', 'fov', 'aspectRatio', 'copyPreview'].forEach(key => {
+        output[key].textContent = 'Invalid';
+      });
+      output.pixelSizeUm.textContent = 'Enter positive numeric values.';
+      output.copyPreviewPixel.textContent = '';
+      output.error.classList.remove('visible');
+      latest = { f: '', pixel: '' };
     }
 
     function calculate() {
@@ -452,16 +470,10 @@
       const sensorH = numberValue(fields.sensorH);
       const imageW = numberValue(fields.imageW);
       const imageH = numberValue(fields.imageH);
-
       const valid = [focal, sensorW, sensorH, imageW, imageH].every(v => Number.isFinite(v) && v > 0);
+
       if (!valid) {
-        output.metashapeF.textContent = 'Invalid';
-        output.pixelSize.textContent = 'Invalid';
-        output.pixelSizeUm.textContent = '正の数値を入力してください';
-        output.fxfy.textContent = 'Invalid';
-        output.fov.textContent = 'Invalid';
-        output.copyText.textContent = '';
-        output.warn.classList.remove('visible');
+        showInvalid();
         return;
       }
 
@@ -474,34 +486,69 @@
       const aspectSensor = sensorW / sensorH;
       const aspectImage = imageW / imageH;
       const aspectDiff = Math.abs(aspectSensor - aspectImage) / aspectSensor;
+      const imageIsSquare = Math.abs(aspectImage - 1) < 0.001;
+      const sensorIsSquare = Math.abs(aspectSensor - 1) < 0.001;
+
+      latest = {
+        f: raw(fX, 5),
+        pixel: raw(pixelSizeW, 6)
+      };
 
       output.metashapeF.textContent = fmt(fX, 5);
       output.pixelSize.textContent = `${fmt(pixelSizeW, 6)} mm`;
       output.pixelSizeUm.textContent = `${fmt(pixelSizeW * 1000, 4)} micrometer / px`;
       output.fxfy.textContent = `${fmt(fX, 5)} / ${fmt(fY, 5)}`;
       output.fov.textContent = `${fmt(hfov, 2)} / ${fmt(vfov, 2)} deg`;
+      output.aspectRatio.textContent = `${aspectSensor.toFixed(4)} / ${aspectImage.toFixed(4)}`;
+      output.copyPreview.textContent = `f ${latest.f}`;
+      output.copyPreviewPixel.textContent = `pixel size ${latest.pixel} mm`;
 
-      if (aspectDiff > 0.001) {
-        output.warn.textContent = `センサーと画像の縦横比が ${(aspectDiff * 100).toFixed(2)}% ずれています。pixel size W=${fmt(pixelSizeW, 6)} mm, H=${fmt(pixelSizeH, 6)} mm。`;
-        output.warn.classList.add('visible');
+      if (aspectDiff > 0.01) {
+        const squareNote = imageIsSquare !== sensorIsSquare
+          ? ' One side is square and the other is not.'
+          : '';
+        output.error.textContent = `Aspect ratio mismatch: sensor ${aspectSensor.toFixed(4)}, image ${aspectImage.toFixed(4)}.${squareNote} Values are still calculated.`;
+        output.error.classList.add('visible');
       } else {
-        output.warn.classList.remove('visible');
+        output.error.textContent = '';
+        output.error.classList.remove('visible');
       }
-
-      output.copyText.textContent = `Metashape f=${fX.toFixed(5)} | pixel_size=${pixelSizeW.toFixed(6)} mm | focal=${focal} mm | sensor=${sensorW}x${sensorH} mm | image=${imageW}x${imageH} px`;
     }
 
-    async function copyResult() {
-      const text = output.copyText.textContent;
+    async function copyText(text, button) {
       if (!text) return;
-      await navigator.clipboard.writeText(text);
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch (error) {
+        const area = document.createElement('textarea');
+        area.value = text;
+        area.setAttribute('readonly', '');
+        area.style.position = 'fixed';
+        area.style.opacity = '0';
+        document.body.appendChild(area);
+        area.select();
+        document.execCommand('copy');
+        document.body.removeChild(area);
+      }
+      const original = button.textContent;
+      button.textContent = 'Copied';
+      button.classList.add('copied');
+      window.setTimeout(() => {
+        button.textContent = original;
+        button.classList.remove('copied');
+      }, 900);
     }
 
     Object.values(fields).forEach(input => input.addEventListener('input', calculate));
-    document.getElementById('presetA7R5').addEventListener('click', () => setPreset(presets.a7r5));
-    document.getElementById('resetDefault').addEventListener('click', () => setPreset(presets.standard));
-    document.getElementById('copyResult').addEventListener('click', copyResult);
-    document.getElementById('copyLine').addEventListener('click', copyResult);
+    document.querySelectorAll('[data-preset]').forEach(button => {
+      button.addEventListener('click', () => setPreset(presets[button.dataset.preset]));
+    });
+    document.querySelectorAll('[data-copy]').forEach(button => {
+      button.addEventListener('click', () => {
+        const value = button.dataset.copy === 'f' ? latest.f : latest.pixel;
+        copyText(value, button);
+      });
+    });
     calculate();
   </script>
 </body>
