@@ -41,7 +41,7 @@
     }
 
     main {
-      width: min(1180px, calc(100% - 28px));
+      width: min(960px, calc(100% - 28px));
       min-height: auto;
       margin: 0 auto;
       padding: 14px 0 14px;
@@ -102,10 +102,16 @@
 
     .board {
       display: grid;
-      grid-template-columns: 360px minmax(420px, 1fr) 320px;
+      grid-template-columns: 360px minmax(520px, 1fr);
       gap: 12px;
       align-items: start;
       min-height: 0;
+    }
+
+    .output-stack {
+      display: grid;
+      gap: 10px;
+      min-width: 0;
     }
 
     .panel {
@@ -154,13 +160,12 @@
 
     .preset-row {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 6px;
+      grid-template-columns: 0.82fr 1.26fr 0.82fr;
+      gap: 5px;
       width: 100%;
     }
 
     .preset-row button { width: 100%; white-space: nowrap; }
-    .preset-row [data-preset="fullframe1600"] { grid-column: 1 / -1; }
 
     button {
       appearance: none;
@@ -168,8 +173,8 @@
       background: #fffdf7;
       color: var(--ink);
       border-radius: 999px;
-      padding: 7px 8px;
-      font: 800 10px/1 var(--sans);
+      padding: 6px 6px;
+      font: 800 9.5px/1 var(--sans);
       cursor: pointer;
       transition: transform 150ms ease, border-color 150ms ease, background 150ms ease;
     }
@@ -218,28 +223,42 @@
     .result-panel button.copied { background: var(--ok-bg); border-color: var(--ok-line); color: var(--ok-ink); }
 
     .hero-result {
-      padding: 16px;
+      padding: 14px;
       display: grid;
       align-content: start;
-      gap: 12px;
+      gap: 10px;
     }
 
-    .f-value span, .pixel-value span { display: block; color: rgba(255,253,247,0.62); font-size: 11px; font-weight: 850; letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 8px; }
-    .f-value strong { display: block; font-family: var(--mono); font-size: clamp(32px, 4.4vw, 50px); line-height: 0.95; letter-spacing: -0.06em; font-weight: 820; font-variant-numeric: tabular-nums; }
-    .pixel-value strong { display: block; font-family: var(--mono); font-size: clamp(22px, 2.7vw, 30px); line-height: 1; letter-spacing: -0.045em; font-weight: 780; font-variant-numeric: tabular-nums; }
-    .pixel-value small { display: block; margin-top: 8px; color: rgba(255,253,247,0.62); font-size: 12px; }
+    .value-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: end;
+      gap: 10px;
+    }
+
+    .value-row button { align-self: center; padding-inline: 10px; }
+    .f-value.value-row {
+      grid-template-columns: max-content auto;
+      justify-content: start;
+      align-items: center;
+      gap: 12px;
+    }
+    .f-value span, .pixel-value span { display: block; color: rgba(255,253,247,0.62); font-size: 11px; font-weight: 850; letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 7px; }
+    .f-value strong { display: block; font-family: var(--mono); font-size: clamp(32px, 4.4vw, 48px); line-height: 0.95; letter-spacing: -0.06em; font-weight: 820; font-variant-numeric: tabular-nums; }
+    .pixel-value strong { display: block; font-family: var(--mono); font-size: clamp(21px, 2.55vw, 28px); line-height: 1; letter-spacing: -0.045em; font-weight: 780; font-variant-numeric: tabular-nums; }
+    .pixel-value small { display: block; margin-top: 6px; color: rgba(255,253,247,0.62); font-size: 11px; }
 
     .detail-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      gap: 8px;
       margin-top: 2px;
     }
 
     .detail {
       border: 1px solid rgba(255,253,247,0.14);
       border-radius: 14px;
-      padding: 9px;
+      padding: 8px;
       background: rgba(255,253,247,0.05);
     }
 
@@ -247,11 +266,37 @@
     .result-panel .detail span { color: rgba(255,253,247,0.56); }
     .detail strong, .diag strong { display: block; font-family: var(--mono); font-size: 15px; font-variant-numeric: tabular-nums; line-height: 1.18; letter-spacing: -0.04em; }
     .detail small, .diag small { display: block; margin-top: 7px; color: var(--muted); font-size: 11px; line-height: 1.45; }
+    .inline-copy { display: inline-flex; gap: 5px; margin: 0; }
+    .inline-copy button { padding-inline: 8px; }
+
+    .pixel-copy-grid {
+      display: grid;
+      gap: 6px;
+    }
+
+    .pixel-copy-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .pixel-copy-row em {
+      color: rgba(255,253,247,0.46);
+      font-style: normal;
+      font-weight: 850;
+      margin-right: 5px;
+    }
+
+    .pixel-copy-row b { font: inherit; }
+
     .result-panel .detail small { color: rgba(255,253,247,0.54); }
 
     .diag-panel { display: grid; grid-template-rows: auto 1fr; }
-    .diag-body { padding: 12px 13px 13px; display: grid; gap: 8px; align-content: start; }
-    .diag { border: 1px solid var(--line); border-radius: 12px; padding: 9px; background: rgba(255,255,255,0.42); }
+    .diag-body { padding: 9px 10px 10px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; align-content: start; }
+    .diag { border: 1px solid var(--line); border-radius: 11px; padding: 7px 8px; background: rgba(255,255,255,0.42); }
+    .diag-body .notice { grid-column: 1 / -1; }
 
     .notice {
       border: 1px solid var(--line);
@@ -282,7 +327,7 @@
 
     @media (max-width: 560px) {
       main { width: min(100% - 24px, 720px); padding: 18px 0; }
-      .two, .detail-grid { grid-template-columns: 1fr; }
+      .two, .detail-grid, .diag-body, .preset-row { grid-template-columns: 1fr; }
       .panel-head { align-items: flex-start; flex-direction: column; }
       .f-value strong { font-size: 42px; }
     }
@@ -348,19 +393,18 @@
         </div>
       </form>
 
+      <div class="output-stack">
       <section class="panel result-panel" aria-live="polite">
         <div class="panel-head">
           <p class="panel-title">Output</p>
-          <div class="copy-actions">
-            <button type="button" data-copy="f">Copy f</button>
-            <button type="button" data-copy="pixelX">Copy px X</button>
-            <button type="button" data-copy="pixelY">Copy px Y</button>
-          </div>
         </div>
         <div class="hero-result">
-          <div class="f-value">
-            <span>Metashape f</span>
-            <strong id="metashapeF">3727.05882</strong>
+          <div class="value-row f-value">
+            <div>
+              <span>Metashape f</span>
+              <strong id="metashapeF">3727.05882</strong>
+            </div>
+            <button type="button" data-copy="f">Copy f</button>
           </div>
           <div class="pixel-value">
             <span>Diagonal pixel size</span>
@@ -370,13 +414,22 @@
           <div class="detail-grid">
             <div class="detail">
               <span>Pixel X / Y</span>
-              <strong id="pixelWHOut">0.003756 / 0.003756</strong>
+              <div class="pixel-copy-grid">
+                <div class="pixel-copy-row">
+                  <strong><em>X</em><b id="pixelXOut">0.003756</b></strong>
+                  <button type="button" data-copy="pixelX">Copy X</button>
+                </div>
+                <div class="pixel-copy-row">
+                  <strong><em>Y</em><b id="pixelYOut">0.003756</b></strong>
+                  <button type="button" data-copy="pixelY">Copy Y</button>
+                </div>
+              </div>
               <small>mm per pixel</small>
             </div>
             <div class="detail">
-              <span>Focal length</span>
+              <span>Focal length 35mm eq.</span>
               <strong id="focalOut">14.00 mm</strong>
-              <small>enter with pixel size, or copy f only</small>
+              <small>35mm-format equivalent</small>
             </div>
           </div>
         </div>
@@ -410,6 +463,7 @@
           <div class="notice error" id="aspectError"></div>
         </div>
       </aside>
+      </div>
     </section>
 
   </main>
@@ -430,7 +484,8 @@
       fxfy: document.getElementById('fxfy'),
       fov: document.getElementById('fov'),
       aspectRatio: document.getElementById('aspectRatio'),
-      pixelWHOut: document.getElementById('pixelWHOut'),
+      pixelXOut: document.getElementById('pixelXOut'),
+      pixelYOut: document.getElementById('pixelYOut'),
       focalOut: document.getElementById('focalOut'),
       aspectStatus: document.getElementById('aspectStatus'),
       error: document.getElementById('aspectError')
@@ -467,7 +522,7 @@
     }
 
     function showInvalid() {
-      ['metashapeF', 'pixelSize', 'fxfy', 'fov', 'aspectRatio', 'pixelWHOut', 'focalOut', 'aspectStatus'].forEach(key => { output[key].textContent = 'Invalid'; });
+      ['metashapeF', 'pixelSize', 'fxfy', 'fov', 'aspectRatio', 'pixelXOut', 'pixelYOut', 'focalOut', 'aspectStatus'].forEach(key => { output[key].textContent = 'Invalid'; });
       output.pixelSizeUm.textContent = 'Enter positive numeric values.';
       output.error.textContent = '';
       output.error.classList.remove('visible');
@@ -491,6 +546,8 @@
       const fMetashape = focal / pixelSizeDiag;
       const fX = focal / pixelSizeW;
       const fY = focal / pixelSizeH;
+      const diag35 = Math.hypot(36, 24);
+      const focal35Eq = focal * diag35 / sensorDiag;
       const hfov = 2 * Math.atan(sensorW / (2 * focal)) * 180 / Math.PI;
       const vfov = 2 * Math.atan(sensorH / (2 * focal)) * 180 / Math.PI;
       const aspectSensor = sensorW / sensorH;
@@ -506,8 +563,9 @@
       output.fxfy.textContent = `${fmt(fX, 5)} / ${fmt(fY, 5)}`;
       output.fov.textContent = `${fmt(hfov, 2)} / ${fmt(vfov, 2)} deg`;
       output.aspectRatio.textContent = `${aspectSensor.toFixed(4)} / ${aspectImage.toFixed(4)}`;
-      output.pixelWHOut.textContent = `${raw(pixelSizeW, 6)} / ${raw(pixelSizeH, 6)}`;
-      output.focalOut.textContent = `${fmt(focal, 2)} mm`;
+      output.pixelXOut.textContent = raw(pixelSizeW, 6);
+      output.pixelYOut.textContent = raw(pixelSizeH, 6);
+      output.focalOut.textContent = `${fmt(focal35Eq, 2)} mm`;
 
       if (aspectDiff > 0.01) {
         const squareNote = imageIsSquare !== sensorIsSquare ? ' Square mismatch.' : '';
