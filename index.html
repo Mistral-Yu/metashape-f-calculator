@@ -41,17 +41,17 @@
     }
 
     main {
-      width: min(1120px, calc(100% - 28px));
+      width: min(1180px, calc(100% - 28px));
       min-height: auto;
       margin: 0 auto;
-      padding: 16px 0 22px;
+      padding: 14px 0 14px;
       display: grid;
-      gap: 10px;
+      gap: 8px;
     }
 
     .topbar {
       display: grid;
-      grid-template-columns: minmax(280px, 0.72fr) minmax(420px, 1.28fr);
+      grid-template-columns: 1fr;
       gap: 12px;
       align-items: center;
     }
@@ -74,9 +74,8 @@
 
     .formula-strip {
       display: grid;
-      grid-template-columns: auto 1fr 1fr;
-      gap: 8px;
-      align-items: center;
+      gap: 7px;
+      align-items: start;
       border: 1px solid var(--line);
       background: rgba(255, 253, 247, 0.68);
       border-radius: 12px;
@@ -84,24 +83,27 @@
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.65);
     }
 
+    .input-panel .formula-strip { margin: 12px 13px 13px; }
+
     .formula-label {
-      padding: 7px 9px;
+      padding: 6px 8px;
       border-radius: 999px;
       background: var(--dark);
       color: #fffdf7;
-      font: 800 11px/1 var(--sans);
+      font: 800 10px/1 var(--sans);
       letter-spacing: 0.08em;
       text-transform: uppercase;
       white-space: nowrap;
     }
 
     code, .number { font-family: var(--mono); letter-spacing: -0.03em; }
-    .formula-strip code { color: var(--muted); font-size: 12px; white-space: nowrap; overflow: auto; }
+    .formula-strip code { color: var(--muted); font-size: 11px; white-space: nowrap; overflow: auto; }
+    .formula-strip a { color: var(--accent); text-decoration: none; font-weight: 800; font-size: 11px; }
 
     .board {
       display: grid;
-      grid-template-columns: 350px minmax(390px, 1fr) 300px;
-      gap: 10px;
+      grid-template-columns: 360px minmax(420px, 1fr) 320px;
+      gap: 12px;
       align-items: start;
       min-height: 0;
     }
@@ -141,7 +143,7 @@
       gap: 8px;
     }
 
-    .input-panel { display: grid; grid-template-rows: auto auto 1fr; }
+    .input-panel { display: grid; grid-template-rows: auto auto auto auto; }
 
     .copy-actions {
       display: flex;
@@ -152,12 +154,13 @@
 
     .preset-row {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 6px;
       width: 100%;
     }
 
     .preset-row button { width: 100%; white-space: nowrap; }
+    .preset-row [data-preset="fullframe1600"] { grid-column: 1 / -1; }
 
     button {
       appearance: none;
@@ -165,8 +168,8 @@
       background: #fffdf7;
       color: var(--ink);
       border-radius: 999px;
-      padding: 7px 9px;
-      font: 800 10.5px/1 var(--sans);
+      padding: 7px 8px;
+      font: 800 10px/1 var(--sans);
       cursor: pointer;
       transition: transform 150ms ease, border-color 150ms ease, background 150ms ease;
     }
@@ -270,22 +273,9 @@
 
     .notice.error.visible { display: block; }
 
-    .footer {
-      display: flex;
-      gap: 12px;
-      justify-content: flex-start;
-      align-items: center;
-      color: var(--muted);
-      font-size: 12px;
-      line-height: 1.45;
-    }
-
-    .footer a { color: var(--accent); text-decoration: none; font-weight: 800; }
-
     @media (max-width: 980px) {
       main { min-height: auto; }
       .topbar, .board { grid-template-columns: 1fr; }
-      .formula-strip { grid-template-columns: 1fr; }
       .formula-label { width: fit-content; }
       .preset-row, .copy-actions { justify-content: flex-start; }
     }
@@ -293,7 +283,7 @@
     @media (max-width: 560px) {
       main { width: min(100% - 24px, 720px); padding: 18px 0; }
       .two, .detail-grid { grid-template-columns: 1fr; }
-      .panel-head, .footer { align-items: flex-start; flex-direction: column; }
+      .panel-head { align-items: flex-start; flex-direction: column; }
       .f-value strong { font-size: 42px; }
     }
   </style>
@@ -304,11 +294,6 @@
       <div>
         <h1 id="title">Metashape f Calculator</h1>
         <p class="lead">Convert lens, sensor, and image dimensions into Metashape f and pixel size.</p>
-      </div>
-      <div class="formula-strip" aria-label="Formula">
-        <span class="formula-label">Formula</span>
-        <code>pixel_size_diag = sensor_diag / image_diag</code>
-        <code>f = focal_length / pixel_size_diag</code>
       </div>
     </section>
 
@@ -321,7 +306,7 @@
           <p class="panel-title">Presets</p>
           <div class="preset-row">
             <button type="button" class="primary" data-preset="a7r5">a7R V 14mm</button>
-            <button type="button" data-preset="fullframe1600">FF 14mm 1600</button>
+            <button type="button" data-preset="fullframe1600">FULL FRAME 14MM 1K6</button>
             <button type="button" data-preset="a6400">a6400 16mm</button>
           </div>
         </div>
@@ -354,6 +339,12 @@
               </label>
             </div>
           </div>
+        </div>
+        <div class="formula-strip" aria-label="Formula and reference">
+          <span class="formula-label">Formula</span>
+          <code>pixel_size_diag = sensor_diag / image_diag</code>
+          <code>f = focal_length / pixel_size_diag</code>
+          <a href="https://www.agisoft.com/forum/index.php?topic=15501.0" target="_blank" rel="noreferrer">Agisoft reference</a>
         </div>
       </form>
 
@@ -421,10 +412,6 @@
       </aside>
     </section>
 
-    <footer class="footer">
-      <span>Presets: a7R V full resolution, rounded full-frame square crop, and a6400 APS-C 16 mm.</span>
-      <a href="https://www.agisoft.com/forum/index.php?topic=15501.0" target="_blank" rel="noreferrer">Agisoft reference</a>
-    </footer>
   </main>
 
   <script>
@@ -451,7 +438,7 @@
 
     const presets = {
       a7r5: { focal: 14, sensorW: 35.7, sensorH: 23.8, imageW: 9504, imageH: 6336 },
-      fullframe1600: { focal: 14, sensorW: 36, sensorH: 24, imageW: 1600, imageH: 1600 },
+      fullframe1600: { focal: 14, sensorW: 36, sensorH: 36, imageW: 1600, imageH: 1600 },
       a6400: { focal: 16, sensorW: 23.5, sensorH: 15.6, imageW: 6000, imageH: 4000 }
     };
 
