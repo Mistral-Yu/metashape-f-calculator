@@ -7,252 +7,256 @@
   <style>
     :root {
       color-scheme: light;
-      --bg: #f6f5f1;
-      --paper: #fffefa;
-      --ink: #171717;
-      --muted: #6a675f;
-      --line: #ded9cd;
+      --bg: #ece7dc;
+      --panel: #fffdf7;
+      --panel-2: #f8f4eb;
+      --ink: #181713;
+      --muted: #6f695e;
+      --line: #d8d0c2;
+      --dark: #20201b;
       --accent: #2f6f62;
-      --accent-ink: #f8fffc;
+      --accent-soft: #dfeee8;
       --error-bg: #fff1e8;
       --error-line: #d18763;
       --error-ink: #733817;
       --ok-bg: #edf8f3;
       --ok-line: #9cc6b8;
       --ok-ink: #22584c;
-      --shadow: 0 22px 60px rgba(43, 39, 31, 0.10);
       --mono: "SFMono-Regular", "Roboto Mono", "JetBrains Mono", Consolas, monospace;
       --sans: "Avenir Next", "Hiragino Sans", "Yu Gothic", system-ui, -apple-system, sans-serif;
     }
 
     * { box-sizing: border-box; }
 
+    html { min-height: 100%; background: #ece7dc; }
+
     body {
       margin: 0;
-      min-height: 100dvh;
+      min-height: 100%;
       font-family: var(--sans);
       color: var(--ink);
       background:
-        radial-gradient(circle at 12% 12%, rgba(47, 111, 98, 0.12), transparent 32rem),
-        linear-gradient(135deg, #f8f7f2 0%, var(--bg) 52%, #ede8dd 100%);
+        radial-gradient(circle at 12% 4%, rgba(47, 111, 98, 0.18), transparent 28rem),
+        linear-gradient(135deg, #f7f4ec 0%, var(--bg) 64%, #ddd5c7 100%);
     }
 
     main {
-      width: min(1180px, calc(100% - 32px));
+      width: min(1120px, calc(100% - 28px));
+      min-height: auto;
       margin: 0 auto;
-      padding: 44px 0 36px;
+      padding: 16px 0 22px;
+      display: grid;
+      gap: 10px;
     }
 
-    .hero {
+    .topbar {
       display: grid;
-      grid-template-columns: minmax(0, 0.82fr) minmax(360px, 1.18fr);
-      gap: 28px;
-      align-items: end;
-      margin-bottom: 28px;
+      grid-template-columns: minmax(280px, 0.72fr) minmax(420px, 1.28fr);
+      gap: 12px;
+      align-items: center;
     }
 
     h1 {
-      margin: 0 0 14px;
-      font-size: clamp(34px, 6vw, 72px);
-      line-height: 0.92;
-      letter-spacing: -0.06em;
-      font-weight: 780;
+      margin: 0;
+      font-size: clamp(28px, 3.3vw, 44px);
+      line-height: 1;
+      letter-spacing: -0.055em;
+      font-weight: 800;
     }
 
     .lead {
-      margin: 0;
+      margin: 6px 0 0;
       color: var(--muted);
-      max-width: 62ch;
-      line-height: 1.8;
-      font-size: 15px;
-    }
-
-    .formula {
-      border-top: 1px solid var(--line);
-      padding-top: 18px;
-      color: var(--muted);
+      max-width: 56ch;
+      line-height: 1.45;
       font-size: 13px;
-      line-height: 1.7;
     }
 
-    .formula code, .tag, .number {
-      font-family: var(--mono);
-      letter-spacing: -0.02em;
-    }
-
-    .app {
+    .formula-strip {
       display: grid;
-      grid-template-columns: minmax(320px, 0.86fr) minmax(0, 1.14fr);
-      gap: 24px;
+      grid-template-columns: auto 1fr 1fr;
+      gap: 8px;
+      align-items: center;
+      border: 1px solid var(--line);
+      background: rgba(255, 253, 247, 0.68);
+      border-radius: 12px;
+      padding: 7px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.65);
+    }
+
+    .formula-label {
+      padding: 7px 9px;
+      border-radius: 999px;
+      background: var(--dark);
+      color: #fffdf7;
+      font: 800 11px/1 var(--sans);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    code, .number { font-family: var(--mono); letter-spacing: -0.03em; }
+    .formula-strip code { color: var(--muted); font-size: 12px; white-space: nowrap; overflow: auto; }
+
+    .board {
+      display: grid;
+      grid-template-columns: 350px minmax(390px, 1fr) 300px;
+      gap: 10px;
       align-items: start;
+      min-height: 0;
     }
 
     .panel {
-      background: rgba(255, 254, 250, 0.88);
-      border: 1px solid rgba(222, 217, 205, 0.86);
-      border-radius: 28px;
-      box-shadow: var(--shadow);
+      background: rgba(255, 253, 247, 0.88);
+      border: 1px solid rgba(216, 208, 194, 0.92);
+      border-radius: 18px;
+      box-shadow: 0 12px 30px rgba(48, 43, 34, 0.075);
       backdrop-filter: blur(18px);
       overflow: hidden;
+      min-width: 0;
     }
 
     .panel-head {
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: space-between;
-      gap: 16px;
-      padding: 22px 24px;
+      gap: 12px;
+      padding: 11px 13px;
       border-bottom: 1px solid var(--line);
     }
 
     .panel-title {
       margin: 0;
-      font-size: 14px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
       color: var(--muted);
-      font-weight: 700;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
     }
 
-    .preset-row, .copy-actions {
-      display: flex;
+    .preset-head {
+      display: grid;
+      grid-template-columns: 1fr;
+      align-items: start;
       gap: 8px;
+    }
+
+    .input-panel { display: grid; grid-template-rows: auto auto 1fr; }
+
+    .copy-actions {
+      display: flex;
+      gap: 6px;
       flex-wrap: wrap;
       justify-content: flex-end;
     }
 
+    .preset-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+      width: 100%;
+    }
+
+    .preset-row button { width: 100%; white-space: nowrap; }
+
     button {
       appearance: none;
       border: 1px solid #cfc8bb;
-      background: #fffefa;
+      background: #fffdf7;
       color: var(--ink);
       border-radius: 999px;
-      padding: 9px 13px;
-      font: 700 12px/1 var(--sans);
+      padding: 7px 9px;
+      font: 800 10.5px/1 var(--sans);
       cursor: pointer;
-      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+      transition: transform 150ms ease, border-color 150ms ease, background 150ms ease;
     }
 
     button:hover { border-color: var(--accent); }
     button:active { transform: translateY(1px) scale(0.99); }
-    button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+    button.primary { background: var(--accent); color: #fffdf7; border-color: var(--accent); }
     button.copied { background: var(--ok-bg); border-color: var(--ok-line); color: var(--ok-ink); }
 
     .fields {
-      padding: 24px;
-      display: grid;
-      gap: 18px;
-    }
-
-    .field-group {
+      padding: 12px 13px 13px;
       display: grid;
       gap: 10px;
     }
 
-    .group-label {
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
+    .field-group { display: grid; gap: 9px; }
+    .group-label { color: var(--muted); font-size: 11px; font-weight: 850; letter-spacing: 0.08em; text-transform: uppercase; }
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
-    .two {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
-    label {
-      display: grid;
-      gap: 7px;
-      font-size: 13px;
-      color: var(--muted);
-      font-weight: 650;
-    }
+    label { display: grid; gap: 6px; color: var(--muted); font-size: 12px; font-weight: 720; }
 
     input {
       width: 100%;
       border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 13px 14px;
-      font: 650 16px/1.2 var(--mono);
+      border-radius: 12px;
+      padding: 9px 10px;
+      font: 720 14px/1.15 var(--mono);
       color: var(--ink);
       background: rgba(255, 255, 255, 0.72);
       outline: none;
-      transition: border-color 160ms ease, box-shadow 160ms ease;
     }
 
-    input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 4px rgba(47, 111, 98, 0.12);
-    }
+    input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(47, 111, 98, 0.12); }
 
-    .results {
+    .result-panel {
       display: grid;
-      gap: 16px;
-      padding: 24px;
+      grid-template-rows: auto 1fr;
+      background: var(--dark);
+      color: #fffdf7;
+      border-color: rgba(32, 32, 27, 0.92);
     }
 
-    .metric-grid {
+    .result-panel .panel-head { border-bottom-color: rgba(255,253,247,0.12); }
+    .result-panel .panel-title { color: rgba(255,253,247,0.68); }
+    .result-panel button { background: rgba(255,253,247,0.08); color: #fffdf7; border-color: rgba(255,253,247,0.22); }
+    .result-panel button.copied { background: var(--ok-bg); border-color: var(--ok-line); color: var(--ok-ink); }
+
+    .hero-result {
+      padding: 16px;
       display: grid;
-      grid-template-columns: 1.18fr 0.82fr;
-      gap: 14px;
+      align-content: start;
+      gap: 12px;
     }
 
-    .metric {
-      min-height: 126px;
-      border: 1px solid var(--line);
-      border-radius: 24px;
-      padding: 18px;
-      background: linear-gradient(180deg, rgba(255,255,255,0.78), rgba(255,255,255,0.42));
+    .f-value span, .pixel-value span { display: block; color: rgba(255,253,247,0.62); font-size: 11px; font-weight: 850; letter-spacing: 0.09em; text-transform: uppercase; margin-bottom: 8px; }
+    .f-value strong { display: block; font-family: var(--mono); font-size: clamp(32px, 4.4vw, 50px); line-height: 0.95; letter-spacing: -0.06em; font-weight: 820; font-variant-numeric: tabular-nums; }
+    .pixel-value strong { display: block; font-family: var(--mono); font-size: clamp(22px, 2.7vw, 30px); line-height: 1; letter-spacing: -0.045em; font-weight: 780; font-variant-numeric: tabular-nums; }
+    .pixel-value small { display: block; margin-top: 8px; color: rgba(255,253,247,0.62); font-size: 12px; }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 2px;
     }
 
-    .metric.main {
-      background: #20201d;
-      color: #fffefa;
-      border-color: #20201d;
+    .detail {
+      border: 1px solid rgba(255,253,247,0.14);
+      border-radius: 14px;
+      padding: 9px;
+      background: rgba(255,253,247,0.05);
     }
 
-    .metric span {
-      display: block;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 750;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin-bottom: 12px;
-    }
+    .detail span, .diag span { display: block; color: var(--muted); font-size: 11px; font-weight: 850; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 7px; }
+    .result-panel .detail span { color: rgba(255,253,247,0.56); }
+    .detail strong, .diag strong { display: block; font-family: var(--mono); font-size: 15px; font-variant-numeric: tabular-nums; line-height: 1.18; letter-spacing: -0.04em; }
+    .detail small, .diag small { display: block; margin-top: 7px; color: var(--muted); font-size: 11px; line-height: 1.45; }
+    .result-panel .detail small { color: rgba(255,253,247,0.54); }
 
-    .metric.main span { color: rgba(255, 254, 250, 0.66); }
-
-    .metric strong {
-      display: block;
-      font-family: var(--mono);
-      font-size: clamp(23px, 3.7vw, 40px);
-      line-height: 1;
-      letter-spacing: -0.06em;
-      font-weight: 760;
-      word-break: break-word;
-    }
-
-    .metric small {
-      display: block;
-      margin-top: 12px;
-      color: var(--muted);
-      line-height: 1.5;
-      font-size: 12px;
-    }
-
-    .metric.main small { color: rgba(255, 254, 250, 0.7); }
+    .diag-panel { display: grid; grid-template-rows: auto 1fr; }
+    .diag-body { padding: 12px 13px 13px; display: grid; gap: 8px; align-content: start; }
+    .diag { border: 1px solid var(--line); border-radius: 12px; padding: 9px; background: rgba(255,255,255,0.42); }
 
     .notice {
       border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 14px 16px;
+      border-radius: 14px;
+      padding: 9px;
       color: var(--muted);
-      line-height: 1.6;
-      font-size: 13px;
+      line-height: 1.45;
+      font-size: 12px;
       background: rgba(255, 255, 255, 0.42);
     }
 
@@ -261,56 +265,66 @@
       border-color: var(--error-line);
       background: var(--error-bg);
       color: var(--error-ink);
-      font-weight: 650;
+      font-weight: 700;
     }
 
     .notice.error.visible { display: block; }
 
-    .source {
-      margin-top: 18px;
+    .footer {
+      display: flex;
+      gap: 12px;
+      justify-content: flex-start;
+      align-items: center;
       color: var(--muted);
       font-size: 12px;
-      line-height: 1.7;
+      line-height: 1.45;
     }
 
-    @media (max-width: 900px) {
-      main { width: min(100% - 24px, 720px); padding-top: 28px; }
-      .hero, .app, .metric-grid { grid-template-columns: 1fr; }
-      .hero { align-items: start; }
+    .footer a { color: var(--accent); text-decoration: none; font-weight: 800; }
+
+    @media (max-width: 980px) {
+      main { min-height: auto; }
+      .topbar, .board { grid-template-columns: 1fr; }
+      .formula-strip { grid-template-columns: 1fr; }
+      .formula-label { width: fit-content; }
       .preset-row, .copy-actions { justify-content: flex-start; }
     }
 
     @media (max-width: 560px) {
-      .two { grid-template-columns: 1fr; }
-      .panel-head { flex-direction: column; }
+      main { width: min(100% - 24px, 720px); padding: 18px 0; }
+      .two, .detail-grid { grid-template-columns: 1fr; }
+      .panel-head, .footer { align-items: flex-start; flex-direction: column; }
+      .f-value strong { font-size: 42px; }
     }
   </style>
 </head>
 <body>
   <main>
-    <section class="hero" aria-labelledby="title">
+    <section class="topbar" aria-labelledby="title">
       <div>
         <h1 id="title">Metashape f Calculator</h1>
-        <p class="lead">Convert focal length, sensor size, and image dimensions into Metashape's pixel-unit focal length and pixel size values.</p>
+        <p class="lead">Convert lens, sensor, and image dimensions into Metashape f and pixel size.</p>
       </div>
-      <div class="formula">
-        Metashape calibration uses focal length in pixels. When your focal length is in millimeters:<br>
-        <code>pixel_size_mm = sensor_width_mm / image_width_px</code><br>
-        <code>metashape_f_px = focal_length_mm / pixel_size_mm</code>
+      <div class="formula-strip" aria-label="Formula">
+        <span class="formula-label">Formula</span>
+        <code>pixel_size = sensor_width / image_width</code>
+        <code>f_px = focal_length / pixel_size</code>
       </div>
     </section>
 
-    <section class="app">
-      <form class="panel" id="calcForm">
+    <section class="board">
+      <form class="panel input-panel" id="calcForm">
         <div class="panel-head">
           <p class="panel-title">Input</p>
+        </div>
+        <div class="panel-head preset-head">
+          <p class="panel-title">Presets</p>
           <div class="preset-row">
             <button type="button" class="primary" data-preset="a7r5">a7R V 14mm</button>
-            <button type="button" data-preset="fullframe1600">Full frame 14mm 1600</button>
+            <button type="button" data-preset="fullframe1600">FF 14mm 1600</button>
             <button type="button" data-preset="a6400">a6400 16mm</button>
           </div>
         </div>
-
         <div class="fields">
           <div class="field-group">
             <div class="group-label">Lens</div>
@@ -318,26 +332,24 @@
               <input id="focal" type="number" inputmode="decimal" min="0.0001" step="0.01" value="14">
             </label>
           </div>
-
           <div class="field-group">
             <div class="group-label">Sensor mm</div>
             <div class="two">
-              <label>Sensor width
+              <label>Width
                 <input id="sensorW" type="number" inputmode="decimal" min="0.0001" step="0.01" value="35.7">
               </label>
-              <label>Sensor height
+              <label>Height
                 <input id="sensorH" type="number" inputmode="decimal" min="0.0001" step="0.01" value="23.8">
               </label>
             </div>
           </div>
-
           <div class="field-group">
             <div class="group-label">Image px</div>
             <div class="two">
-              <label>Image width
+              <label>Width
                 <input id="imageW" type="number" inputmode="numeric" min="1" step="1" value="9504">
               </label>
-              <label>Image height
+              <label>Height
                 <input id="imageH" type="number" inputmode="numeric" min="1" step="1" value="6336">
               </label>
             </div>
@@ -345,62 +357,72 @@
         </div>
       </form>
 
-      <section class="panel" aria-live="polite">
+      <section class="panel result-panel" aria-live="polite">
         <div class="panel-head">
           <p class="panel-title">Output</p>
           <div class="copy-actions">
             <button type="button" data-copy="f">Copy f</button>
-            <button type="button" data-copy="pixel">Copy pixel size</button>
+            <button type="button" data-copy="pixel">Copy pixel</button>
           </div>
         </div>
-
-        <div class="results">
-          <div class="metric-grid">
-            <div class="metric main">
-              <span>Metashape f</span>
-              <strong id="metashapeF">3727.05882</strong>
-              <small>Pixel-unit focal length for Metashape's precalibrated f field.</small>
-            </div>
-            <div class="metric">
-              <span>Pixel size</span>
-              <strong id="pixelSize">0.003756 mm</strong>
-              <small id="pixelSizeUm">3.7563 micrometer / px</small>
-            </div>
+        <div class="hero-result">
+          <div class="f-value">
+            <span>Metashape f</span>
+            <strong id="metashapeF">3727.05882</strong>
           </div>
-
-          <div class="metric-grid">
-            <div class="metric">
+          <div class="pixel-value">
+            <span>Pixel size</span>
+            <strong id="pixelSize">0.003756 mm</strong>
+            <small id="pixelSizeUm">3.7563 micrometer / px</small>
+          </div>
+          <div class="detail-grid">
+            <div class="detail">
               <span>f_x / f_y</span>
               <strong id="fxfy">3727.05882 / 3727.05882</strong>
-              <small>Uses width and height pixel size separately.</small>
             </div>
-            <div class="metric">
-              <span>Aspect ratio</span>
-              <strong id="aspectRatio">1.5000 / 1.5000</strong>
-              <small>Sensor aspect / image aspect.</small>
-            </div>
-          </div>
-
-          <div class="metric-grid">
-            <div class="metric">
-              <span>FOV</span>
-              <strong id="fov">103.78 / 80.73 deg</strong>
-              <small>Horizontal / vertical field of view.</small>
-            </div>
-            <div class="metric">
+            <div class="detail">
               <span>Copy values</span>
               <strong id="copyPreview">f 3727.05882</strong>
-              <small id="copyPreviewPixel">pixel size 0.003756 mm</small>
+              <small id="copyPreviewPixel">pixel 0.003756 mm</small>
             </div>
           </div>
-
-          <div class="notice error" id="aspectError"></div>
-          <div class="notice">Calculation continues even when the aspect ratios differ. For square perspective crops from a non-square sensor, use the width-based f value if you want to match Metashape's single f field convention.</div>
         </div>
       </section>
+
+      <aside class="panel diag-panel">
+        <div class="panel-head">
+          <p class="panel-title">Checks</p>
+        </div>
+        <div class="diag-body">
+          <div class="diag">
+            <span>Aspect ratio</span>
+            <strong id="aspectRatio">1.5000 / 1.5000</strong>
+            <small>sensor / image</small>
+          </div>
+          <div class="diag">
+            <span>FOV</span>
+            <strong id="fov">103.78 / 80.73 deg</strong>
+            <small>horizontal / vertical</small>
+          </div>
+          <div class="diag">
+            <span>Pixel W / H</span>
+            <strong id="pixelWH">0.003756 / 0.003756</strong>
+            <small>millimeters per pixel</small>
+          </div>
+          <div class="diag">
+            <span>Status</span>
+            <strong id="aspectStatus">Matched</strong>
+            <small>aspect ratio check</small>
+          </div>
+          <div class="notice error" id="aspectError"></div>
+        </div>
+      </aside>
     </section>
 
-    <p class="source">Presets: Sony a7R V full resolution, rounded full-frame 36 x 24 mm square 1600 px crop, and Sony a6400 APS-C still image at 16 mm.</p>
+    <footer class="footer">
+      <span>Presets: a7R V full resolution, rounded full-frame square crop, and a6400 APS-C 16 mm.</span>
+      <a href="https://www.agisoft.com/forum/index.php?topic=15501.0" target="_blank" rel="noreferrer">Agisoft reference</a>
+    </footer>
   </main>
 
   <script>
@@ -419,6 +441,8 @@
       fxfy: document.getElementById('fxfy'),
       fov: document.getElementById('fov'),
       aspectRatio: document.getElementById('aspectRatio'),
+      pixelWH: document.getElementById('pixelWH'),
+      aspectStatus: document.getElementById('aspectStatus'),
       error: document.getElementById('aspectError'),
       copyPreview: document.getElementById('copyPreview'),
       copyPreviewPixel: document.getElementById('copyPreviewPixel')
@@ -445,21 +469,20 @@
       });
     }
 
-    function raw(value, digits) {
-      return Number.isFinite(value) ? value.toFixed(digits) : '';
-    }
+    function raw(value, digits) { return Number.isFinite(value) ? value.toFixed(digits) : ''; }
 
-    function setPreset(preset) {
+    function setPreset(preset, activeButton) {
       Object.entries(preset).forEach(([key, value]) => { fields[key].value = value; });
+      document.querySelectorAll('[data-preset]').forEach(button => button.classList.remove('primary'));
+      if (activeButton) activeButton.classList.add('primary');
       calculate();
     }
 
     function showInvalid() {
-      ['metashapeF', 'pixelSize', 'fxfy', 'fov', 'aspectRatio', 'copyPreview'].forEach(key => {
-        output[key].textContent = 'Invalid';
-      });
+      ['metashapeF', 'pixelSize', 'fxfy', 'fov', 'aspectRatio', 'pixelWH', 'aspectStatus', 'copyPreview'].forEach(key => { output[key].textContent = 'Invalid'; });
       output.pixelSizeUm.textContent = 'Enter positive numeric values.';
       output.copyPreviewPixel.textContent = '';
+      output.error.textContent = '';
       output.error.classList.remove('visible');
       latest = { f: '', pixel: '' };
     }
@@ -471,11 +494,7 @@
       const imageW = numberValue(fields.imageW);
       const imageH = numberValue(fields.imageH);
       const valid = [focal, sensorW, sensorH, imageW, imageH].every(v => Number.isFinite(v) && v > 0);
-
-      if (!valid) {
-        showInvalid();
-        return;
-      }
+      if (!valid) return showInvalid();
 
       const pixelSizeW = sensorW / imageW;
       const pixelSizeH = sensorH / imageH;
@@ -489,29 +508,26 @@
       const imageIsSquare = Math.abs(aspectImage - 1) < 0.001;
       const sensorIsSquare = Math.abs(aspectSensor - 1) < 0.001;
 
-      latest = {
-        f: raw(fX, 5),
-        pixel: raw(pixelSizeW, 6)
-      };
-
+      latest = { f: raw(fX, 5), pixel: raw(pixelSizeW, 6) };
       output.metashapeF.textContent = fmt(fX, 5);
       output.pixelSize.textContent = `${fmt(pixelSizeW, 6)} mm`;
       output.pixelSizeUm.textContent = `${fmt(pixelSizeW * 1000, 4)} micrometer / px`;
       output.fxfy.textContent = `${fmt(fX, 5)} / ${fmt(fY, 5)}`;
       output.fov.textContent = `${fmt(hfov, 2)} / ${fmt(vfov, 2)} deg`;
       output.aspectRatio.textContent = `${aspectSensor.toFixed(4)} / ${aspectImage.toFixed(4)}`;
+      output.pixelWH.textContent = `${raw(pixelSizeW, 6)} / ${raw(pixelSizeH, 6)}`;
       output.copyPreview.textContent = `f ${latest.f}`;
-      output.copyPreviewPixel.textContent = `pixel size ${latest.pixel} mm`;
+      output.copyPreviewPixel.textContent = `pixel ${latest.pixel} mm`;
 
       if (aspectDiff > 0.01) {
-        const squareNote = imageIsSquare !== sensorIsSquare
-          ? ' One side is square and the other is not.'
-          : '';
-        output.error.textContent = `Aspect ratio mismatch: sensor ${aspectSensor.toFixed(4)}, image ${aspectImage.toFixed(4)}.${squareNote} Values are still calculated.`;
+        const squareNote = imageIsSquare !== sensorIsSquare ? ' Square mismatch.' : '';
+        output.error.textContent = `Aspect mismatch: sensor ${aspectSensor.toFixed(4)}, image ${aspectImage.toFixed(4)}.${squareNote}`;
         output.error.classList.add('visible');
+        output.aspectStatus.textContent = 'Mismatch';
       } else {
         output.error.textContent = '';
         output.error.classList.remove('visible');
+        output.aspectStatus.textContent = 'Matched';
       }
     }
 
@@ -533,21 +549,15 @@
       const original = button.textContent;
       button.textContent = 'Copied';
       button.classList.add('copied');
-      window.setTimeout(() => {
-        button.textContent = original;
-        button.classList.remove('copied');
-      }, 900);
+      window.setTimeout(() => { button.textContent = original; button.classList.remove('copied'); }, 900);
     }
 
     Object.values(fields).forEach(input => input.addEventListener('input', calculate));
     document.querySelectorAll('[data-preset]').forEach(button => {
-      button.addEventListener('click', () => setPreset(presets[button.dataset.preset]));
+      button.addEventListener('click', () => setPreset(presets[button.dataset.preset], button));
     });
     document.querySelectorAll('[data-copy]').forEach(button => {
-      button.addEventListener('click', () => {
-        const value = button.dataset.copy === 'f' ? latest.f : latest.pixel;
-        copyText(value, button);
-      });
+      button.addEventListener('click', () => copyText(button.dataset.copy === 'f' ? latest.f : latest.pixel, button));
     });
     calculate();
   </script>
