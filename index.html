@@ -41,12 +41,12 @@
     }
 
     main {
-      width: min(1280px, calc(100vw - clamp(20px, 4vw, 56px)));
+      width: min(calc(100vw - clamp(20px, 4vw, 64px)), clamp(1120px, 72vw, 1760px));
       min-height: auto;
       margin: 0 auto;
       padding: clamp(10px, 1.6vw, 18px) 0 clamp(12px, 1.8vw, 22px);
       display: grid;
-      gap: clamp(8px, 1.2vw, 14px);
+      gap: clamp(8px, 1.2vw, 16px);
     }
 
     .topbar {
@@ -110,8 +110,8 @@
 
     .board {
       display: grid;
-      grid-template-columns: minmax(320px, 0.74fr) minmax(460px, 1fr);
-      gap: clamp(10px, 1.2vw, 16px);
+      grid-template-columns: minmax(360px, 0.72fr) minmax(560px, 1fr);
+      gap: clamp(10px, 1.3vw, 22px);
       align-items: start;
       min-height: 0;
       min-width: 0;
