@@ -41,12 +41,12 @@
     }
 
     main {
-      width: min(960px, calc(100% - 28px));
+      width: min(1280px, calc(100vw - clamp(20px, 4vw, 56px)));
       min-height: auto;
       margin: 0 auto;
-      padding: 14px 0 14px;
+      padding: clamp(10px, 1.6vw, 18px) 0 clamp(12px, 1.8vw, 22px);
       display: grid;
-      gap: 8px;
+      gap: clamp(8px, 1.2vw, 14px);
     }
 
     .topbar {
@@ -54,7 +54,10 @@
       grid-template-columns: 1fr;
       gap: 12px;
       align-items: center;
+      min-width: 0;
     }
+
+    .topbar > div { min-width: 0; }
 
     h1 {
       margin: 0;
@@ -67,11 +70,15 @@
     .lead {
       margin: 6px 0 0;
       color: var(--muted);
-      max-width: none;
+      max-width: 100%;
       line-height: 1.45;
       font-size: 13px;
       white-space: nowrap;
+      overflow-x: auto;
+      scrollbar-width: none;
     }
+
+    .lead::-webkit-scrollbar { display: none; }
 
     .formula-strip {
       display: grid;
@@ -103,11 +110,14 @@
 
     .board {
       display: grid;
-      grid-template-columns: 360px minmax(520px, 1fr);
-      gap: 12px;
+      grid-template-columns: minmax(320px, 0.74fr) minmax(460px, 1fr);
+      gap: clamp(10px, 1.2vw, 16px);
       align-items: start;
       min-height: 0;
+      min-width: 0;
     }
+
+    .board > * { min-width: 0; }
 
     .output-stack {
       display: grid;
@@ -319,7 +329,7 @@
 
     .notice.error.visible { display: block; }
 
-    @media (max-width: 980px) {
+    @media (max-width: 900px) {
       main { min-height: auto; }
       .topbar, .board { grid-template-columns: 1fr; }
       .formula-label { width: fit-content; }
@@ -328,8 +338,11 @@
 
     @media (max-width: 560px) {
       main { width: min(100% - 24px, 720px); padding: 18px 0; }
+      .lead { white-space: normal; overflow-x: visible; }
       .two, .detail-grid, .diag-body, .preset-row { grid-template-columns: 1fr; }
       .panel-head { align-items: flex-start; flex-direction: column; }
+      .f-value.value-row { grid-template-columns: 1fr; justify-content: stretch; align-items: start; }
+      .value-row button { width: fit-content; }
       .f-value strong { font-size: 42px; }
     }
   </style>

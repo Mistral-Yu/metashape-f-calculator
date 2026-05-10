@@ -2,6 +2,8 @@
 
 A small single-page calculator for estimating Metashape camera calibration `f` and pixel size from focal length, sensor size, and image resolution.
 
+[Open the calculator on GitHub Pages](https://mistral-yu.github.io/metashape-f-calculator/)
+
 ## Features
 
 - Computes Metashape `f` in pixels
@@ -21,4 +23,4 @@ The visible Metashape reference links to Agisoft's official camera model documen
 
 ## Usage
 
-Open `index.html` locally, or use the GitHub Pages site once enabled.
+Open `index.html` locally, or use the GitHub Pages link above.
