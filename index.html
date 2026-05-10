@@ -178,6 +178,21 @@
 
     .preset-row button { width: 100%; white-space: nowrap; }
 
+    .mode-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 5px;
+    }
+
+    .mode-row button { width: 100%; white-space: nowrap; }
+
+    .derived-note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
     button {
       appearance: none;
       border: 1px solid #cfc8bb;
@@ -339,7 +354,7 @@
     @media (max-width: 560px) {
       main { width: min(100% - 24px, 720px); padding: 18px 0; }
       .lead { white-space: normal; overflow-x: visible; }
-      .two, .detail-grid, .diag-body, .preset-row { grid-template-columns: 1fr; }
+      .two, .detail-grid, .diag-body, .preset-row, .mode-row { grid-template-columns: 1fr; }
       .panel-head { align-items: flex-start; flex-direction: column; }
       .f-value.value-row { grid-template-columns: 1fr; justify-content: stretch; align-items: start; }
       .value-row button { width: fit-content; }
@@ -397,6 +412,15 @@
                 <input id="imageH" type="number" inputmode="numeric" min="1" step="1" value="6336">
               </label>
             </div>
+          </div>
+          <div class="field-group">
+            <div class="group-label">Video 16:9 quick fill</div>
+            <div class="mode-row" aria-label="Video resolution shortcuts">
+              <button type="button" data-video="8k">8K</button>
+              <button type="button" data-video="4k">4K</button>
+              <button type="button" data-video="fhd">FHD</button>
+            </div>
+            <p class="derived-note">Keeps focal length and sensor width. Sets sensor height to width × 9 / 16.</p>
           </div>
         </div>
         <div class="formula-strip" aria-label="Formula and reference">
@@ -511,6 +535,12 @@
       a6400: { focal: 16, sensorW: 23.5, sensorH: 15.6, imageW: 6000, imageH: 4000 }
     };
 
+    const videoModes = {
+      '8k': { imageW: 7680, imageH: 4320 },
+      '4k': { imageW: 3840, imageH: 2160 },
+      fhd: { imageW: 1920, imageH: 1080 }
+    };
+
     let latest = { f: '', pixelX: '', pixelY: '' };
 
     function numberValue(input) {
@@ -531,6 +561,19 @@
     function setPreset(preset, activeButton) {
       Object.entries(preset).forEach(([key, value]) => { fields[key].value = value; });
       document.querySelectorAll('[data-preset]').forEach(button => button.classList.remove('primary'));
+      document.querySelectorAll('[data-video]').forEach(button => button.classList.remove('primary'));
+      if (activeButton) activeButton.classList.add('primary');
+      calculate();
+    }
+
+    function applyVideoMode(mode, activeButton) {
+      const resolution = videoModes[mode];
+      const sensorW = numberValue(fields.sensorW);
+      if (!resolution || !Number.isFinite(sensorW) || sensorW <= 0) return;
+      fields.sensorH.value = raw(sensorW * 9 / 16, 5);
+      fields.imageW.value = resolution.imageW;
+      fields.imageH.value = resolution.imageH;
+      document.querySelectorAll('[data-video]').forEach(button => button.classList.remove('primary'));
       if (activeButton) activeButton.classList.add('primary');
       calculate();
     }
@@ -614,9 +657,15 @@
       window.setTimeout(() => { button.textContent = original; button.classList.remove('copied'); }, 900);
     }
 
-    Object.values(fields).forEach(input => input.addEventListener('input', calculate));
+    Object.values(fields).forEach(input => input.addEventListener('input', () => {
+      document.querySelectorAll('[data-video]').forEach(button => button.classList.remove('primary'));
+      calculate();
+    }));
     document.querySelectorAll('[data-preset]').forEach(button => {
       button.addEventListener('click', () => setPreset(presets[button.dataset.preset], button));
+    });
+    document.querySelectorAll('[data-video]').forEach(button => {
+      button.addEventListener('click', () => applyVideoMode(button.dataset.video, button));
     });
     document.querySelectorAll('[data-copy]').forEach(button => {
       button.addEventListener('click', () => {
