@@ -420,7 +420,7 @@
               <button type="button" data-video="4k">4K</button>
               <button type="button" data-video="fhd">FHD</button>
             </div>
-            <p class="derived-note">Keeps focal length and sensor width. Sets sensor height to width × 9 / 16.</p>
+            <p class="derived-note">Output-only override. Keeps inputs unchanged; click active mode again to turn off.</p>
           </div>
         </div>
         <div class="formula-strip" aria-label="Formula and reference">
@@ -542,6 +542,7 @@
     };
 
     let latest = { f: '', pixelX: '', pixelY: '' };
+    let activeVideoMode = null;
 
     function numberValue(input) {
       const value = Number(input.value);
@@ -560,6 +561,7 @@
 
     function setPreset(preset, activeButton) {
       Object.entries(preset).forEach(([key, value]) => { fields[key].value = value; });
+      activeVideoMode = null;
       document.querySelectorAll('[data-preset]').forEach(button => button.classList.remove('primary'));
       document.querySelectorAll('[data-video]').forEach(button => button.classList.remove('primary'));
       if (activeButton) activeButton.classList.add('primary');
@@ -568,13 +570,11 @@
 
     function applyVideoMode(mode, activeButton) {
       const resolution = videoModes[mode];
-      const sensorW = numberValue(fields.sensorW);
-      if (!resolution || !Number.isFinite(sensorW) || sensorW <= 0) return;
-      fields.sensorH.value = raw(sensorW * 9 / 16, 5);
-      fields.imageW.value = resolution.imageW;
-      fields.imageH.value = resolution.imageH;
+      if (!resolution) return;
+      const wasActive = activeVideoMode === mode;
+      activeVideoMode = wasActive ? null : mode;
       document.querySelectorAll('[data-video]').forEach(button => button.classList.remove('primary'));
-      if (activeButton) activeButton.classList.add('primary');
+      if (!wasActive && activeButton) activeButton.classList.add('primary');
       calculate();
     }
 
@@ -589,14 +589,22 @@
     function calculate() {
       const focal = numberValue(fields.focal);
       const sensorW = numberValue(fields.sensorW);
-      const sensorH = numberValue(fields.sensorH);
-      const imageW = numberValue(fields.imageW);
-      const imageH = numberValue(fields.imageH);
+      let sensorH = numberValue(fields.sensorH);
+      let imageW = numberValue(fields.imageW);
+      let imageH = numberValue(fields.imageH);
       const valid = [focal, sensorW, sensorH, imageW, imageH].every(v => Number.isFinite(v) && v > 0);
       if (!valid) return showInvalid();
 
+      if (activeVideoMode) {
+        const resolution = videoModes[activeVideoMode];
+        sensorH = sensorW * 9 / 16;
+        imageW = resolution.imageW;
+        imageH = resolution.imageH;
+      }
+
       const pixelSizeW = sensorW / imageW;
       const pixelSizeH = sensorH / imageH;
+
       const sensorDiag = Math.hypot(sensorW, sensorH);
       const imageDiag = Math.hypot(imageW, imageH);
       const pixelSizeDiag = sensorDiag / imageDiag;
@@ -657,10 +665,7 @@
       window.setTimeout(() => { button.textContent = original; button.classList.remove('copied'); }, 900);
     }
 
-    Object.values(fields).forEach(input => input.addEventListener('input', () => {
-      document.querySelectorAll('[data-video]').forEach(button => button.classList.remove('primary'));
-      calculate();
-    }));
+    Object.values(fields).forEach(input => input.addEventListener('input', calculate));
     document.querySelectorAll('[data-preset]').forEach(button => {
       button.addEventListener('click', () => setPreset(presets[button.dataset.preset], button));
     });
