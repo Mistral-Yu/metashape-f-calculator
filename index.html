@@ -67,9 +67,10 @@
     .lead {
       margin: 6px 0 0;
       color: var(--muted);
-      max-width: 56ch;
+      max-width: none;
       line-height: 1.45;
       font-size: 13px;
+      white-space: nowrap;
     }
 
     .formula-strip {
@@ -160,7 +161,7 @@
 
     .preset-row {
       display: grid;
-      grid-template-columns: 0.82fr 1.26fr 0.82fr;
+      grid-template-columns: 0.82fr 0.82fr 1.26fr;
       gap: 5px;
       width: 100%;
     }
@@ -338,7 +339,7 @@
     <section class="topbar" aria-labelledby="title">
       <div>
         <h1 id="title">Metashape f Calculator</h1>
-        <p class="lead">Convert lens, sensor, and image dimensions into Metashape f and pixel size.</p>
+        <p class="lead">Convert focal length, sensor size, and image resolution into Metashape f and pixel size.</p>
       </div>
     </section>
 
@@ -351,8 +352,8 @@
           <p class="panel-title">Presets</p>
           <div class="preset-row">
             <button type="button" class="primary" data-preset="a7r5">a7R V 14mm</button>
-            <button type="button" data-preset="fullframe1600">FULL FRAME 14MM 1K6</button>
             <button type="button" data-preset="a6400">a6400 16mm</button>
+            <button type="button" data-preset="fullframe1600">FULL FRAME 14MM 1K6</button>
           </div>
         </div>
         <div class="fields">
