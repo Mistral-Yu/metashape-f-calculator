@@ -427,9 +427,9 @@
               <small>mm per pixel</small>
             </div>
             <div class="detail">
-              <span>Focal length 35mm eq.</span>
+              <span>35mm eq. focal length</span>
               <strong id="focalOut">14.00 mm</strong>
-              <small>35mm-format equivalent</small>
+              <small>RealityScan long-edge / 36mm basis</small>
             </div>
           </div>
         </div>
@@ -546,8 +546,8 @@
       const fMetashape = focal / pixelSizeDiag;
       const fX = focal / pixelSizeW;
       const fY = focal / pixelSizeH;
-      const diag35 = Math.hypot(36, 24);
-      const focal35Eq = focal * diag35 / sensorDiag;
+      const sensorLong = Math.max(sensorW, sensorH);
+      const focal35Eq = focal * 36 / sensorLong;
       const hfov = 2 * Math.atan(sensorW / (2 * focal)) * 180 / Math.PI;
       const vfov = 2 * Math.atan(sensorH / (2 * focal)) * 180 / Math.PI;
       const aspectSensor = sensorW / sensorH;
