@@ -1,0 +1,29 @@
+[
+  {
+    "id": "a7r5",
+    "label": "a7R V 14mm",
+    "focal": 14,
+    "sensorW": 35.7,
+    "sensorH": 23.8,
+    "imageW": 9504,
+    "imageH": 6336
+  },
+  {
+    "id": "a6400",
+    "label": "a6400 16mm",
+    "focal": 16,
+    "sensorW": 23.5,
+    "sensorH": 15.6,
+    "imageW": 6000,
+    "imageH": 4000
+  },
+  {
+    "id": "fullframe1600",
+    "label": "FULL FRAME 14MM 1K6",
+    "focal": 14,
+    "sensorW": 36,
+    "sensorH": 36,
+    "imageW": 1600,
+    "imageH": 1600
+  }
+]

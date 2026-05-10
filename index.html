@@ -171,12 +171,20 @@
 
     .preset-row {
       display: grid;
-      grid-template-columns: 0.82fr 0.82fr 1.26fr;
+      grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
       gap: 5px;
       width: 100%;
     }
 
     .preset-row button { width: 100%; white-space: nowrap; }
+
+    .preset-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .preset-actions button { padding-inline: 9px; }
 
     .mode-row {
       display: grid;
@@ -378,10 +386,10 @@
         </div>
         <div class="panel-head preset-head">
           <p class="panel-title">Presets</p>
-          <div class="preset-row">
-            <button type="button" class="primary" data-preset="a7r5">a7R V 14mm</button>
-            <button type="button" data-preset="a6400">a6400 16mm</button>
-            <button type="button" data-preset="fullframe1600">FULL FRAME 14MM 1K6</button>
+          <div class="preset-row" id="presetRow" aria-label="Camera presets"></div>
+          <div class="preset-actions">
+            <button type="button" id="addPreset">Add current</button>
+            <button type="button" id="exportPresets">Export JSON</button>
           </div>
         </div>
         <div class="fields">
@@ -515,6 +523,10 @@
       imageH: document.getElementById('imageH')
     };
 
+    const presetRow = document.getElementById('presetRow');
+    const addPresetButton = document.getElementById('addPreset');
+    const exportPresetsButton = document.getElementById('exportPresets');
+
     const output = {
       metashapeF: document.getElementById('metashapeF'),
       pixelSize: document.getElementById('pixelSize'),
@@ -529,11 +541,14 @@
       error: document.getElementById('aspectError')
     };
 
-    const presets = {
-      a7r5: { focal: 14, sensorW: 35.7, sensorH: 23.8, imageW: 9504, imageH: 6336 },
-      fullframe1600: { focal: 14, sensorW: 36, sensorH: 36, imageW: 1600, imageH: 1600 },
-      a6400: { focal: 16, sensorW: 23.5, sensorH: 15.6, imageW: 6000, imageH: 4000 }
-    };
+    const defaultPresets = [
+      { id: 'a7r5', label: 'a7R V 14mm', focal: 14, sensorW: 35.7, sensorH: 23.8, imageW: 9504, imageH: 6336 },
+      { id: 'a6400', label: 'a6400 16mm', focal: 16, sensorW: 23.5, sensorH: 15.6, imageW: 6000, imageH: 4000 },
+      { id: 'fullframe1600', label: 'FULL FRAME 14MM 1K6', focal: 14, sensorW: 36, sensorH: 36, imageW: 1600, imageH: 1600 }
+    ];
+
+    const presetStorageKey = 'metashape-f-calculator-extra-presets';
+    let presets = [...defaultPresets];
 
     const videoModes = {
       '8k': { imageW: 7680, imageH: 4320 },
@@ -559,8 +574,88 @@
 
     function raw(value, digits) { return Number.isFinite(value) ? value.toFixed(digits) : ''; }
 
+    function normalizePreset(preset, index = 0) {
+      const normalized = {
+        id: String(preset.id || `preset-${index + 1}`).trim(),
+        label: String(preset.label || preset.name || `Preset ${index + 1}`).trim(),
+        focal: Number(preset.focal),
+        sensorW: Number(preset.sensorW),
+        sensorH: Number(preset.sensorH),
+        imageW: Number(preset.imageW),
+        imageH: Number(preset.imageH)
+      };
+      const valid = normalized.label && [normalized.focal, normalized.sensorW, normalized.sensorH, normalized.imageW, normalized.imageH].every(v => Number.isFinite(v) && v > 0);
+      return valid ? normalized : null;
+    }
+
+    function uniquePresets(list) {
+      const seen = new Set();
+      return list.filter(preset => {
+        const key = preset.id || preset.label;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
+
+    function storedPresets() {
+      try {
+        return JSON.parse(localStorage.getItem(presetStorageKey) || '[]')
+          .map(normalizePreset)
+          .filter(Boolean);
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveStoredPresets(extraPresets) {
+      localStorage.setItem(presetStorageKey, JSON.stringify(extraPresets, null, 2));
+    }
+
+    function renderPresets() {
+      presetRow.replaceChildren();
+      presets.forEach((preset, index) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.dataset.preset = preset.id;
+        button.textContent = preset.label;
+        if (index === 0) button.classList.add('primary');
+        button.addEventListener('click', () => setPreset(preset, button));
+        presetRow.appendChild(button);
+      });
+    }
+
+    async function loadPresets() {
+      let loaded = defaultPresets;
+      try {
+        const response = await fetch('presets.json', { cache: 'no-store' });
+        if (response.ok) {
+          const json = await response.json();
+          const parsed = Array.isArray(json) ? json.map(normalizePreset).filter(Boolean) : [];
+          if (parsed.length) loaded = parsed;
+        }
+      } catch (error) {
+        loaded = defaultPresets;
+      }
+      presets = uniquePresets([...loaded, ...storedPresets()]);
+      renderPresets();
+      if (presets[0]) setPreset(presets[0], presetRow.querySelector('[data-preset]'));
+    }
+
+    function currentPreset(label) {
+      return normalizePreset({
+        id: label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `preset-${Date.now()}`,
+        label,
+        focal: numberValue(fields.focal),
+        sensorW: numberValue(fields.sensorW),
+        sensorH: numberValue(fields.sensorH),
+        imageW: numberValue(fields.imageW),
+        imageH: numberValue(fields.imageH)
+      });
+    }
+
     function setPreset(preset, activeButton) {
-      Object.entries(preset).forEach(([key, value]) => { fields[key].value = value; });
+      Object.keys(fields).forEach(key => { fields[key].value = preset[key]; });
       activeVideoMode = null;
       document.querySelectorAll('[data-preset]').forEach(button => button.classList.remove('primary'));
       document.querySelectorAll('[data-video]').forEach(button => button.classList.remove('primary'));
@@ -666,8 +761,20 @@
     }
 
     Object.values(fields).forEach(input => input.addEventListener('input', calculate));
-    document.querySelectorAll('[data-preset]').forEach(button => {
-      button.addEventListener('click', () => setPreset(presets[button.dataset.preset], button));
+    addPresetButton.addEventListener('click', () => {
+      const label = window.prompt('Preset name', 'Custom preset');
+      if (!label) return;
+      const preset = currentPreset(label);
+      if (!preset) return;
+      const extra = uniquePresets([...storedPresets(), preset]);
+      saveStoredPresets(extra);
+      presets = uniquePresets([...presets, preset]);
+      renderPresets();
+      const button = [...document.querySelectorAll('[data-preset]')].find(item => item.dataset.preset === preset.id);
+      setPreset(preset, button);
+    });
+    exportPresetsButton.addEventListener('click', () => {
+      copyText(JSON.stringify(presets, null, 2), exportPresetsButton);
     });
     document.querySelectorAll('[data-video]').forEach(button => {
       button.addEventListener('click', () => applyVideoMode(button.dataset.video, button));
@@ -679,6 +786,7 @@
         copyText(value, button);
       });
     });
+    loadPresets();
     calculate();
   </script>
 </body>
