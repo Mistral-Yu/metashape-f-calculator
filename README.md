@@ -25,7 +25,7 @@ The visible Metashape reference links to Agisoft's official camera model documen
 ## Usage
 
 Open `index.html` locally, or use the GitHub Pages link above.
-Edit `presets.json` to change the default preset list. Added presets can be exported as JSON and pasted back into that file.
+Edit `presets.json` directly to add or change presets.
 
 ## License
 

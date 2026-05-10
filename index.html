@@ -169,22 +169,11 @@
       justify-content: flex-end;
     }
 
-    .preset-row {
+    .preset-select {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(112px, 1fr));
-      gap: 5px;
+      gap: 6px;
       width: 100%;
     }
-
-    .preset-row button { width: 100%; white-space: nowrap; }
-
-    .preset-actions {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .preset-actions button { padding-inline: 9px; }
 
     .mode-row {
       display: grid;
@@ -230,7 +219,7 @@
 
     label { display: grid; gap: 6px; color: var(--muted); font-size: 12px; font-weight: 720; }
 
-    input {
+    input, select {
       width: 100%;
       border: 1px solid var(--line);
       border-radius: 12px;
@@ -241,7 +230,7 @@
       outline: none;
     }
 
-    input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(47, 111, 98, 0.12); }
+    input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(47, 111, 98, 0.12); }
 
     .result-panel {
       display: grid;
@@ -362,7 +351,7 @@
     @media (max-width: 560px) {
       main { width: min(100% - 24px, 720px); padding: 18px 0; }
       .lead { white-space: normal; overflow-x: visible; }
-      .two, .detail-grid, .diag-body, .preset-row, .mode-row { grid-template-columns: 1fr; }
+      .two, .detail-grid, .diag-body, .mode-row { grid-template-columns: 1fr; }
       .panel-head { align-items: flex-start; flex-direction: column; }
       .f-value.value-row { grid-template-columns: 1fr; justify-content: stretch; align-items: start; }
       .value-row button { width: fit-content; }
@@ -386,11 +375,12 @@
         </div>
         <div class="panel-head preset-head">
           <p class="panel-title">Presets</p>
-          <div class="preset-row" id="presetRow" aria-label="Camera presets"></div>
-          <div class="preset-actions">
-            <button type="button" id="addPreset">Add current</button>
-            <button type="button" id="exportPresets">Export JSON</button>
-          </div>
+          <label class="preset-select">Preset source: presets.json
+            <select id="presetSelect" aria-label="Camera presets">
+              <option>Loading presets...</option>
+            </select>
+          </label>
+          <p class="derived-note">Edit presets.json to add or change presets.</p>
         </div>
         <div class="fields">
           <div class="field-group">
@@ -523,9 +513,7 @@
       imageH: document.getElementById('imageH')
     };
 
-    const presetRow = document.getElementById('presetRow');
-    const addPresetButton = document.getElementById('addPreset');
-    const exportPresetsButton = document.getElementById('exportPresets');
+    const presetSelect = document.getElementById('presetSelect');
 
     const output = {
       metashapeF: document.getElementById('metashapeF'),
@@ -547,7 +535,6 @@
       { id: 'fullframe1600', label: 'FULL FRAME 14MM 1K6', focal: 14, sensorW: 36, sensorH: 36, imageW: 1600, imageH: 1600 }
     ];
 
-    const presetStorageKey = 'metashape-f-calculator-extra-presets';
     let presets = [...defaultPresets];
 
     const videoModes = {
@@ -598,30 +585,14 @@
       });
     }
 
-    function storedPresets() {
-      try {
-        return JSON.parse(localStorage.getItem(presetStorageKey) || '[]')
-          .map(normalizePreset)
-          .filter(Boolean);
-      } catch (error) {
-        return [];
-      }
-    }
-
-    function saveStoredPresets(extraPresets) {
-      localStorage.setItem(presetStorageKey, JSON.stringify(extraPresets, null, 2));
-    }
-
     function renderPresets() {
-      presetRow.replaceChildren();
+      presetSelect.replaceChildren();
       presets.forEach((preset, index) => {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.dataset.preset = preset.id;
-        button.textContent = preset.label;
-        if (index === 0) button.classList.add('primary');
-        button.addEventListener('click', () => setPreset(preset, button));
-        presetRow.appendChild(button);
+        const option = document.createElement('option');
+        option.value = preset.id;
+        option.textContent = preset.label;
+        if (index === 0) option.selected = true;
+        presetSelect.appendChild(option);
       });
     }
 
@@ -637,29 +608,16 @@
       } catch (error) {
         loaded = defaultPresets;
       }
-      presets = uniquePresets([...loaded, ...storedPresets()]);
+      presets = uniquePresets(loaded);
       renderPresets();
-      if (presets[0]) setPreset(presets[0], presetRow.querySelector('[data-preset]'));
+      if (presets[0]) setPreset(presets[0]);
     }
 
-    function currentPreset(label) {
-      return normalizePreset({
-        id: label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || `preset-${Date.now()}`,
-        label,
-        focal: numberValue(fields.focal),
-        sensorW: numberValue(fields.sensorW),
-        sensorH: numberValue(fields.sensorH),
-        imageW: numberValue(fields.imageW),
-        imageH: numberValue(fields.imageH)
-      });
-    }
-
-    function setPreset(preset, activeButton) {
+    function setPreset(preset) {
       Object.keys(fields).forEach(key => { fields[key].value = preset[key]; });
+      presetSelect.value = preset.id;
       activeVideoMode = null;
-      document.querySelectorAll('[data-preset]').forEach(button => button.classList.remove('primary'));
       document.querySelectorAll('[data-video]').forEach(button => button.classList.remove('primary'));
-      if (activeButton) activeButton.classList.add('primary');
       calculate();
     }
 
@@ -761,20 +719,9 @@
     }
 
     Object.values(fields).forEach(input => input.addEventListener('input', calculate));
-    addPresetButton.addEventListener('click', () => {
-      const label = window.prompt('Preset name', 'Custom preset');
-      if (!label) return;
-      const preset = currentPreset(label);
-      if (!preset) return;
-      const extra = uniquePresets([...storedPresets(), preset]);
-      saveStoredPresets(extra);
-      presets = uniquePresets([...presets, preset]);
-      renderPresets();
-      const button = [...document.querySelectorAll('[data-preset]')].find(item => item.dataset.preset === preset.id);
-      setPreset(preset, button);
-    });
-    exportPresetsButton.addEventListener('click', () => {
-      copyText(JSON.stringify(presets, null, 2), exportPresetsButton);
+    presetSelect.addEventListener('change', () => {
+      const preset = presets.find(item => item.id === presetSelect.value);
+      if (preset) setPreset(preset);
     });
     document.querySelectorAll('[data-video]').forEach(button => {
       button.addEventListener('click', () => applyVideoMode(button.dataset.video, button));
